@@ -167,9 +167,9 @@ function init() {
     init_input();
     init_draw();
 
-    redraw();
-
     init_canvas();
+
+    redraw();
 }
 
 function draw_operation(op) {
@@ -208,7 +208,7 @@ function redraw() {
     draw["background"]();
     draw["polygons"]();
     draw["graph_edges"]();
-    draw["text_circular"]()
+    draw["text_circular"]();
     draw["label_line"]();
 }
 
