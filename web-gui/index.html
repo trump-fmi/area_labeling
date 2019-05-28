@@ -4,13 +4,14 @@
 <head>
 	<title>Area Labeling Demo</title>
 
-	<script src="scripts/area.js"></script>
-	<script src="scripts/arealabel.js"></script>
-	<script src="scripts/projection.js"></script>
-	<script src="scripts/poi.js"></script>
+	<script src="{{url_for('static', filename='area.js') }}"></script>
+	<script src="{{url_for('static', filename='arealabel.js') }}"></script>
+	<script src="{{url_for('static', filename='projection.js') }}"></script>
+	<script src="{{url_for('static', filename='poi.js') }}"></script>
+	<script src="{{url_for('static', filename='live_label_demo.js') }}"></script>
 </head>
 
-<body>
+<body onload="init();">
 	<canvas id='canvas' height=750px width=750px></canvas>
 	<!--
 		<div>
@@ -40,3 +41,5 @@
 	</div>
 
 </body>
+
+</html>
