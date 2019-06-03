@@ -5,10 +5,12 @@
 	<title>Area Labeling Demo</title>
 
 	<script src="{{url_for('static', filename='canvas.js') }}"></script>
-	<script src="{{url_for('static', filename='area.js') }}"></script>
-	<script src="{{url_for('static', filename='arealabel.js') }}"></script>
+	<!--<script src="{{url_for('static', filename='area.js') }}"></script>
+	<script src="{{url_for('static', filename='arealabel.js') }}"></script>-->
 	<script src="{{url_for('static', filename='projection.js') }}"></script>
-	<script src="{{url_for('static', filename='poi.js') }}"></script>
+	<!--<script src="{{url_for('static', filename='poi.js') }}"></script>-->
+	<script src="{{url_for('static', filename='primitives.js') }}"></script>
+	<script src="{{url_for('static', filename='io.js') }}"></script>
 	<!--<script src="{{url_for('static', filename='live_label_demo.js') }}"></script>-->
 </head>
 
@@ -32,13 +34,9 @@
 			<label>Current <it>t</it>:</label>
 			<input type="range" min="0" max="100" value="50" class="slider" id="slider_t"></div>
 		<hr>
-		<label>Area data input:</label>
-		<br>
-		<input type="file" id="poly_file">
-		<br>
-		<label>Points of interest data input:</label>
-		<br>
-		<input type="file" id="poi_file">
+		<label>Choose a label file to display:</label>
+		<input type="file" id="label_input" multiple=false>
+		<button id="label_file_submit">Submit</button>
 	</div>
 
 </body>

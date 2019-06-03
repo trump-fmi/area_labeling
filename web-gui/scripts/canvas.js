@@ -1,7 +1,16 @@
 // canvas offset width, height
-var CANVAS_OFFSET = [15, 150];
+var CANVAS_OFFSET = [15, 110];
 var DEBUG = true;
 var BASELINE = 0.1;
+var TEXTWIDTHRATIO = 0.6;
+
+function setTextMeasures(ctx) {
+    let txt = "QÄ"
+    ctx.save();
+    ctx.font = "10px monospace";
+    TEXTWIDTHRATIO = ctx.measureText(txt).width / (10 * txt.length);
+    ctx.restore();
+}
 
 function debug(message) {
     if (DEBUG) {
@@ -13,6 +22,9 @@ class Canvas {
     constructor(element) {
         this.canvas = element;
         this.context = this.canvas.getContext("2d");
+
+        setTextMeasures(this.context);
+
         this.windowFit();
         this.projector = new LinearProjector([0, this.width], [0, this.height], this.width, this.height);
     }
@@ -100,15 +112,20 @@ class Canvas {
      *  to          // the angle (in radians) where the arc ends
      * ]
      */
-    drawArc(arc, style = "#666666", lineWidth = 1) {
+    drawArc(arc, style = "#666666", lineWidth = 1, scale = false) {
         let ctx = this.context;
-        let p = this.projector;
         let [c, r, a, b] = arc
+        if (scale) {
+            let p = this.projector;
+            c = p.project(c);
+            r = p.scale(r);
+        }
         ctx.save();
         ctx.strokeStyle = style;
         ctx.lineWidth = lineWidth;
         ctx.beginPath()
-        ctx.arc(...p.project(c), p.scale(r), a, b);
+
+        ctx.arc(...c, r, a, b);
         ctx.stroke();
         ctx.restore();
     }
@@ -125,16 +142,16 @@ class Canvas {
     drawCurvedLabel(curvedLabel) {
         let ctx = this.context;
         let p = this.projector;
-        let [center, radius, angle, label] = curvedLabel;
-        let r = p.scale(radius[0]);
-        let R = p.scale(radius[1]);
+        let [center, blRadius, fontSize, angle, label] = curvedLabel;
+        let bl = p.scale(blRadius);
+        let r = bl - BASELINE * fontSize;
+        let R = r + fontSize;
 
-        let H = R - r
         let angleRange = angle[1] - angle[0];
         let angleDelta = angleRange / label.length;
 
         ctx.save();
-        ctx.font = H + "px monospace";
+        ctx.font = fontSize + "px monospace";
         ctx.textAlign = "center";
         ctx.fillStyle = "black";
         ctx.translate(...p.project(center));
@@ -142,14 +159,14 @@ class Canvas {
         ctx.rotate(angle[0]);
         ctx.rotate(angleDelta / 2);
         for (let c of label) {
-            ctx.fillText(c, 0, -r - H * BASELINE);
+            ctx.fillText(c, 0, -r - BASELINE * fontSize);
             ctx.rotate(angleDelta);
         }
         ctx.restore();
 
         if (DEBUG) {
-            this.drawArc([center, radius[1], ...angle], "orange", 1);
-            this.drawArc([center, radius[0], ...angle], "green", 1);
+            this.drawArc([p.project(center), R, ...angle], "orange", 1);
+            this.drawArc([p.project(center), r, ...angle], "green", 1);
         }
     }
 
@@ -168,19 +185,18 @@ class Canvas {
         let [center, radius, size, label] = diskLabel;
         let c = p.project(center);
         let r = p.scale(radius)
-        let s = p.scale(size);
-        debug(`printing label "${label}" to position ${c} with size ${s}`);
+        debug(`printing label "${label}" to position ${c} with size ${size}`);
 
         ctx.save();
-        ctx.font = s + "px monospace";
+        ctx.font = size + "px monospace";
         ctx.textAlign = "center";
         ctx.fillStyle = "black";
         ctx.translate(...c);
-        ctx.fillText(label, 0, -s * BASELINE);
+        ctx.fillText(label, 0, -size * BASELINE);
         ctx.restore();
 
         if (DEBUG) {
-            this.drawArc([center, radius, 0, 2 * Math.PI], "orange", 1);
+            this.drawArc([c, label.length * TEXTWIDTHRATIO * size / 2, 0, 2 * Math.PI], "green", 1);
         }
     }
 }
@@ -190,11 +206,19 @@ function resize() {
     test();
 }
 
+function refresh(data) {
+    alert("Hello from refresh!");
+
+    console.log(`${data}`);
+}
+
 var canvas;
 
 function init() {
     canvas = new Canvas(document.getElementById('canvas'));
+    document.getElementById("label_input").addEventListener('change', data_input);
     window.addEventListener("resize", resize, false);
+
     //    init_context();
     //    init_draw();
     //    init_canvas();
@@ -209,11 +233,15 @@ function test() {
             [[100, 75], [400, 75], [400, 25], [100, 25]],
             [[300, 130], [200, 130], [250, 130], [250, 50]]
         ],
-        new AreaLabel("QTESTÄ", [250, 0], 100, 120, -2, 0)
+        new AreaLabel("QTESTÄ", [250, 0], 100, 20, -Math.PI / 2, 0)
     );
     area.draw(canvas);
     let poi = new PointOfInterest("TestDisk", [250, 130], 50, 20);
     poi.draw(canvas);
+    poi = new PointOfInterest("__________", [250, 100], 60, 20);
+    poi.draw(canvas);
+
+    let obj = JSON.parse('{"type":"FeatureCollection","features":[{"type":"Feature","property":"blah"}, {"type":"Feature","property":"blah2"}]}');
 }
 /*
 var context;
