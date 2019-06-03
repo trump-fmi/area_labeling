@@ -1,0 +1,127 @@
+[
+    {
+        "type": "Feature",
+        "id": 123456789,
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+                250,
+                130
+            ]
+        },
+        "properties": {
+            "label": {
+                "property": 24,
+                "label": [
+                    "TestDisk"
+                ],
+                "elimination": [
+                    {
+                        "popup": 0,
+                        "elim": 1000000
+                    }
+                ],
+                "font": {
+                    "family": "Dejavu Sans Mono",
+                    "size": 20,
+                    "style": "Normal"
+                }
+            }
+        }
+    },
+    {
+        "type": "Feature",
+        "id": 987654321,
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [
+                        0,
+                        0
+                    ],
+                    [
+                        450,
+                        150
+                    ],
+                    [
+                        500,
+                        100
+                    ],
+                    [
+                        50,
+                        -50
+                    ],
+                    [
+                        0,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        100,
+                        75
+                    ],
+                    [
+                        400,
+                        75
+                    ],
+                    [
+                        400,
+                        25
+                    ],
+                    [
+                        100,
+                        25
+                    ]
+                ],
+                [
+                    [
+                        300,
+                        130
+                    ],
+                    [
+                        200,
+                        130
+                    ],
+                    [
+                        250,
+                        130
+                    ],
+                    [
+                        250,
+                        50
+                    ]
+                ]
+            ]
+        },
+        "properties": {
+            "label": {
+                "level": 35,
+                "label": [
+                    "QTestÄ"
+                ],
+                "elimination": [
+                    {
+                        "popup": 0,
+                        "elim": 100000
+                    }
+                ],
+                "font": {
+                    "family": "Dejavu Sans Mono",
+                    "size": 30,
+                    "style": "Normal"
+                },
+                "baseline": {
+                    "center": [
+                        250,
+                        0
+                    ],
+                    "radius": 120,
+                    "from": -2,
+                    "to": 0
+                }
+            }
+        }
+    }
+]
