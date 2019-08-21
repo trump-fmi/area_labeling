@@ -3,7 +3,7 @@
 
 
 int main(int argc, char *argv[]) {
-  std::vector<Segment> segs;
+  std::vector<longest_paths::Segment> segs;
   double px, py, qx, qy, w, c;
   while (std::cin >> px >> py >> qx >> qy >> w >> c)
     segs.push_back({{px, py}, {qx, qy}, w, c});

@@ -9,46 +9,48 @@
 
 #include <nlopt.hpp>
 
-struct Point {
-  double x, y;
-};
+namespace circle_apx_nsp {
+  struct Point {
+    double x, y;
+  };
 
-struct Circle {
-  double x, y, r;
-};
+  struct Circle {
+    double x, y, r;
+  };
+}
 
-Circle apx_circle(const std::vector<Point> &points) {
+circle_apx_nsp::Circle apx_circle(const std::vector<circle_apx_nsp::Point> &points) {
   size_t N = points.size();
 
   double sx =
       std::accumulate(points.begin(), points.end(), 0.,
-                      [](double acc, const Point &p) { return acc + p.x; });
+                      [](double acc, const circle_apx_nsp::Point &p) { return acc + p.x; });
   double sy =
       std::accumulate(points.begin(), points.end(), 0.,
-                      [](double acc, const Point &p) { return acc + p.y; });
+                      [](double acc, const circle_apx_nsp::Point &p) { return acc + p.y; });
 
   double sx2 = std::accumulate(
       points.begin(), points.end(), 0.,
-      [](double acc, const Point &p) { return acc + p.x * p.x; });
+      [](double acc, const circle_apx_nsp::Point &p) { return acc + p.x * p.x; });
   double sxy = std::accumulate(
       points.begin(), points.end(), 0.,
-      [](double acc, const Point &p) { return acc + p.x * p.y; });
+      [](double acc, const circle_apx_nsp::Point &p) { return acc + p.x * p.y; });
   double sy2 = std::accumulate(
       points.begin(), points.end(), 0.,
-      [](double acc, const Point &p) { return acc + p.y * p.y; });
+      [](double acc, const circle_apx_nsp::Point &p) { return acc + p.y * p.y; });
 
   double sx3 = std::accumulate(
       points.begin(), points.end(), 0.,
-      [](double acc, const Point &p) { return acc + p.x * p.x * p.x; });
+      [](double acc, const circle_apx_nsp::Point &p) { return acc + p.x * p.x * p.x; });
   double sx2y = std::accumulate(
       points.begin(), points.end(), 0.,
-      [](double acc, const Point &p) { return acc + p.x * p.x * p.y; });
+      [](double acc, const circle_apx_nsp::Point &p) { return acc + p.x * p.x * p.y; });
   double sxy2 = std::accumulate(
       points.begin(), points.end(), 0.,
-      [](double acc, const Point &p) { return acc + p.x * p.y * p.y; });
+      [](double acc, const circle_apx_nsp::Point &p) { return acc + p.x * p.y * p.y; });
   double sy3 = std::accumulate(
       points.begin(), points.end(), 0.,
-      [](double acc, const Point &p) { return acc + p.y * p.y * p.y; });
+      [](double acc, const circle_apx_nsp::Point &p) { return acc + p.y * p.y * p.y; });
 
   double a1 = 2 * (sx * sx - N * sx2);
   double b1 = 2 * (sx * sy - N * sxy);
@@ -80,11 +82,11 @@ Circle apx_circle(const std::vector<Point> &points) {
   return {x_bar, y_bar, std::sqrt(R_squared)};
 }
 
-std::vector<double> compute_radii(const std::vector<Point> &points,
-                                  Point center) {
+std::vector<double> compute_radii(const std::vector<circle_apx_nsp::Point> &points,
+                                  circle_apx_nsp::Point center) {
   std::vector<double> radii;
   std::transform(points.begin(), points.end(), std::back_inserter(radii),
-                 [center](const Point &p) {
+                 [center](const circle_apx_nsp::Point &p) {
                    double dx = p.x - center.x;
                    double dy = p.y - center.y;
                    return std::sqrt(dx * dx + dy * dy);
@@ -92,8 +94,8 @@ std::vector<double> compute_radii(const std::vector<Point> &points,
   return radii;
 }
 
-std::vector<double> compute_derivative(const std::vector<Point> &points,
-                                       Point center) {
+std::vector<double> compute_derivative(const std::vector<circle_apx_nsp::Point> &points,
+                                       circle_apx_nsp::Point center) {
   // https://core.ac.uk/download/pdf/35472611.pdf
   auto radii = compute_radii(points, center);
   auto R = std::accumulate(radii.begin(), radii.end(), 0.) / radii.size();
@@ -114,7 +116,7 @@ std::vector<double> compute_derivative(const std::vector<Point> &points,
 
 double err(const std::vector<double> &center, std::vector<double> &grad,
            void *points_ref) {
-  const std::vector<Point> &points = *(const std::vector<Point> *)points_ref;
+  const std::vector<circle_apx_nsp::Point> &points = *(const std::vector<circle_apx_nsp::Point> *)points_ref;
   double x = center[0];
   double y = center[1];
 
@@ -132,14 +134,14 @@ double err(const std::vector<double> &center, std::vector<double> &grad,
       [R](double acc, double r) { return acc + (R - r) * (R - r); });
 }
 
-Point apx_nl(const std::vector<Point> &points) {
+circle_apx_nsp::Point apx_nl(const std::vector<circle_apx_nsp::Point> &points) {
 
   nlopt::opt opt(nlopt::LD_MMA, 2);
   opt.set_ftol_rel(.0001);
   opt.set_xtol_rel(.001);
   opt.set_min_objective(err, (void *)&points);
 
-  Circle c = apx_circle(points);
+  circle_apx_nsp::Circle c = apx_circle(points);
   std::vector<double> x = {c.x, c.y}; /* `*`some` `initial` `guess`*` */
   double minf; /* `*`the` `minimum` `objective` `value,` `upon` `return`*` */
   if (points.size() > 3)
@@ -148,8 +150,8 @@ Point apx_nl(const std::vector<Point> &points) {
   return {x[0], x[1]};
 }
 
-Circle apx_circle_nl(const std::vector<Point> &points) {
-  Point center = apx_nl(points);
+circle_apx_nsp::Circle apx_circle_nl(const std::vector<circle_apx_nsp::Point> &points) {
+  circle_apx_nsp::Point center = apx_nl(points);
   auto radii = compute_radii(points, center);
   auto R = std::accumulate(radii.begin(), radii.end(), 0.) / radii.size();
   return {center.x, center.y, R};

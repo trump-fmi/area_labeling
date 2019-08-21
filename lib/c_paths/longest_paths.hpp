@@ -16,30 +16,32 @@
 
 using namespace boost;
 
-struct Point {
-  double x, y;
-  bool operator==(const Point q) const { return x == q.x && y == q.y; }
-  friend std::size_t hash_value(Point const &p) {
-    std::size_t seed = 0;
-    boost::hash_combine(seed, p.x);
-    boost::hash_combine(seed, p.y);
-    return seed;
-  }
-};
+namespace longest_paths {
+  struct Point {
+    double x, y;
+    bool operator==(const Point q) const { return x == q.x && y == q.y; }
+    friend std::size_t hash_value(Point const &p) {
+      std::size_t seed = 0;
+      boost::hash_combine(seed, p.x);
+      boost::hash_combine(seed, p.y);
+      return seed;
+    }
+  };
 
-struct Segment {
-  Point src, trg;
-  double weight, cap;
-};
+  struct Segment {
+    Point src, trg;
+    double weight, cap;
+  };
+}
 
-using Node = Point;
+using Node = longest_paths::Point;
 using Graph = adjacency_list<
     vecS, vecS, undirectedS, Node,
     property<edge_weight_t, double, property<edge_capacity_t, double>>>;
 using Vertex = Graph::vertex_descriptor;
 using Edge = Graph::edge_descriptor;
 
-using LGraph = labeled_graph<Graph, Point, hash_mapS>;
+using LGraph = labeled_graph<Graph, longest_paths::Point, hash_mapS>;
 
 template <class Type> using Predicate = std::function<bool(Type)>;
 using FGraph = filtered_graph<Graph, Predicate<Vertex>, Predicate<Edge>>;
@@ -156,7 +158,9 @@ std::vector<Vertex> furthest_rooted_nodes(const Graph &g,
   std::vector<double> dist(num_vertices(g));
   std::vector<Vertex> component_furthest(vertices_begin, vertices_end);
   std::vector<size_t> root(num_vertices(g));
-  for (auto i = 0, vit = vertices_begin; vit != vertices_end; ++vit, ++i) {
+
+  size_t i = 0;
+  for (auto vit = vertices_begin; vit != vertices_end; ++vit, ++i) {
     root[*vit] = i;
   }
 

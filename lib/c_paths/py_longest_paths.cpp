@@ -14,7 +14,7 @@ using namespace boost::python;
 class LongestPaths {
 public:
   void build(list edges) {
-    std::vector<Segment> segments;
+    std::vector<longest_paths::Segment> segments;
     for (size_t i(0); i < len(edges); ++i) {
       auto p = edges[i][0];
       auto q = edges[i][1];
@@ -36,7 +36,7 @@ public:
     for (auto &path : res) {
       list py_path; 
       for (Vertex v : path) {
-        Point p = graph[v];
+        longest_paths::Point p = graph[v];
         py_path.append(boost::python::make_tuple(p.x, p.y));
       }
       py_res.append(py_path);
