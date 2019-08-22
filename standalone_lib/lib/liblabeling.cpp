@@ -62,12 +62,6 @@ std::optional<liblabel::AreaLabel> liblabel::computeLabel(
         Polygon& poly,
         liblabel::Config configuration
     ){
-    std::cout << "Starting label search with config values:\n"
-        << "Step size:\t" << configuration.stepSize << "\n"
-        << "Path number:\t" << configuration.numberOfPaths
-        << std::endl;
-    debug::printPolygon(poly);
-
     std::cout << "Constructing the polygon ..." << std::endl;
     KPolyWithHoles ph = constructPolygon(poly);
     std::cout << "... finished" << std::endl;
@@ -79,12 +73,23 @@ std::optional<liblabel::AreaLabel> liblabel::computeLabel(
     if(!skeletonOp.has_value()) {
         return {};
     }
+    std::cout << "The computed skeleton contains " << skeletonOp.value().size() << " many edges" << std::endl;
 
     // Find candidate paths
+    std::cout << "Searching for longest paths ..." << std::endl;
     auto paths = computeLongestPaths(skeletonOp.value(), aspect, configuration);
+    std::cout << "... finished. Found " << paths.size() << " candidate paths" << std::endl;
 
     // Evaluate paths
-    return evaluatePaths(paths, aspect, ph);
+    std::cout << "Evaluating paths ..." << std::endl;
+    auto res = evaluatePaths(paths, aspect, ph);
+    if(!res.has_value()) {
+        std::cout << "... finished without an result!" << std::endl;
+    } else {
+        std::cout << "... finished" << std::endl;
+    }
+
+    return res;
 }
 
 
@@ -125,8 +130,6 @@ namespace {
             return {};
         }
         auto skeleton_edges = compute_skeleton_edges(cdt);
-
-        std::cout << "Test" << std::endl;
 
         std::vector<AugmentedSkeletonEdge> res;
         std::transform(skeleton_edges.begin(), skeleton_edges.end(),
@@ -233,7 +236,6 @@ namespace {
 
         auto max = std::max_element(result.begin(), result.end(),
             [](auto p, auto q) { return p.second.y() < q.second.y();} );
-
 
         return {constructLabel(*max, aspect)};
     }
