@@ -16,6 +16,7 @@ The label is completely contained within the boundary polygon and does not inter
 By searching for a position which allows a maximum size of the label we try to provide a good readability of the label.
 
 The label is of the following form (see figure below for an illustration)
+
 ![Parameters of a curved label](pics/areaLabelParams.png)
 
 The library at hand computes such a label automatically.
