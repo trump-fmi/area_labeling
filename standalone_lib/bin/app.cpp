@@ -38,18 +38,15 @@ int main() {
     std::copy(std::istream_iterator<double>(szStream),
         std::istream_iterator<double>(),
         std::back_inserter(coords));
-    cout << "Got coordinate sequence: " << endl;
-    for(auto c : coords) {
-        cout << c << " ";
-    }
-    cout << endl;
     liblabel::Polyline outer = assemblePolygon(coords);
 
     std::vector<liblabel::Polyline> holes;
     char input = 'i';
-    cout << "Enter i to insert a hole (s to skip): ";
-    cin >> input;
     while(input == 'i') {
+        cout << "Enter i to insert a hole (c to continue): ";
+        cin >> input;
+        std::cin.ignore();      // ignore the newline character after aspect input
+        if(input != 'i') continue;
         coords.clear();
         cout << "Give the sequence of coordinates defining the boundary of the hole: " << endl;
         std::getline(cin, szTmp);
