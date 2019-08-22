@@ -20,10 +20,12 @@ liblabel::Polyline assemblePolygon(std::vector<double>& coords) {
 }
 
 int main() {
-    cout << "Hello from main!" << endl;
+    cout << "Let's compute a curved area label!" << endl;
+
+    cout.precision(16);
 
     double aspect;
-    cout << "Give the aspect ratio: ";
+    cout << "Give the label aspect ratio A = H/W: ";
     cin >> aspect;
     std::cin.ignore();      // ignore the newline character after aspect input
 
@@ -45,7 +47,7 @@ int main() {
 
     std::vector<liblabel::Polyline> holes;
     char input = 'i';
-    cout << "Press i to insert a hole: ";
+    cout << "Enter i to insert a hole (s to skip): ";
     cin >> input;
     while(input == 'i') {
         coords.clear();
@@ -67,8 +69,12 @@ int main() {
         cout << "Computed label was:\n"
             << "Center\t" << "(" << label.center.x << ", " << label.center.y << ")\n"
             << "Radii \t" << "low: " << label.rad_lower << " up: " << label.rad_upper << "\n"
-            << "Angles\t" << "from: " << label.from << " to: " << label.to
-            << endl;
+            << "Angles\t" << "from: " << label.from << " to: " << label.to << endl;
+        cout << "As tuple: " << endl;
+        cout << "(" << label.center.x << ", " << label.center.y
+             << ", " << label.rad_lower << ", " << label.rad_upper
+             << ", " << label.from << ", " << label.to << ")"
+             << endl;
     } else {
         cout << "Label for the given input could not be constructed!" << endl;
     }
