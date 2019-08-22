@@ -180,8 +180,8 @@ namespace {
 
     double normalizeAngle(double angle) {
         angle = fmod(angle, 2*M_PI);
-        if(angle > 2*M_PI) {
-            angle -= 2*M_PI;
+        if(angle < 0) {
+            angle += 2*M_PI;
         }
         return angle;
     }
@@ -193,7 +193,7 @@ namespace {
         double baseAngle = value.second.x();
         double angleRange = value.second.y();
         double x = (aspect * angleRange);
-        double h = x * center.y / (1 + x);
+        double h = x * baseRadius / (1 + x);
         // double base_angle = normalizeAngle(base_angle);
         return {
             center, baseRadius - h, baseRadius + h,
