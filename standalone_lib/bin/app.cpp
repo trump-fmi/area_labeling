@@ -10,7 +10,7 @@ using std::cin;
 using std::cout;
 using std::endl;
 
-liblabel::Polyline assemblePolygon(std::vector<double>& coords) {
+liblabel::Polyline assemblePolyline(std::vector<double>& coords) {
     assert(coords.size() % 2 == 0);
     std::vector<liblabel::Point> points;
     for(auto it = coords.begin(), end = coords.end(); it != end; ++it) {
@@ -19,12 +19,14 @@ liblabel::Polyline assemblePolygon(std::vector<double>& coords) {
     return {points};
 }
 
-int main() {
-    cout << "Let's compute a curved area label!" << endl;
+struct Input {
+    liblabel::Aspect aspect;
+    liblabel::Polygon poly;
+};
 
-    cout.precision(16);
+Input interactiveInput() {
+    liblabel::Aspect aspect;
 
-    double aspect;
     cout << "Give the label aspect ratio A = H/W: ";
     cin >> aspect;
     std::cin.ignore();      // ignore the newline character after aspect input
@@ -38,12 +40,12 @@ int main() {
     std::copy(std::istream_iterator<double>(szStream),
         std::istream_iterator<double>(),
         std::back_inserter(coords));
-    liblabel::Polyline outer = assemblePolygon(coords);
+    liblabel::Polyline outer = assemblePolyline(coords);
 
     std::vector<liblabel::Polyline> holes;
     char input = 'i';
     while(input == 'i') {
-        cout << "Enter i to insert a hole (c to continue): ";
+        cout << "Enter i to insert a hole (c to cancel): ";
         cin >> input;
         std::cin.ignore();      // ignore the newline character after aspect input
         if(input != 'i') continue;
@@ -54,12 +56,23 @@ int main() {
         std::copy(std::istream_iterator<double>(szStream),
             std::istream_iterator<double>(),
             std::back_inserter(coords));
-        holes.push_back(assemblePolygon(coords));
+        holes.push_back(assemblePolyline(coords));
     }
-    liblabel::Polygon inputPoly = {outer, holes};
+
+    return {aspect, {outer, holes}};
+}
+
+int main(int argc, char** argv) {
+    cout << "Get labeling parameters interactively!" << endl;
+    Input input = interactiveInput();
+
+    cout << "Let's compute a curved area label!" << endl;
+    cout << "Aspect was " << input.aspect << endl;
+    cout << "Input poly outer poly has " << input.poly.outer.points.size() << " points"
+         << " and " << input.poly.holes.size() << " holes." << endl;
 
     std::cout << "Starting labeling ..." << std::endl;
-    auto labelOp = liblabel::computeLabel(aspect, inputPoly);
+    auto labelOp = liblabel::computeLabel(input.aspect, input.poly);
 
     if(labelOp.has_value()) {
         auto label = labelOp.value();
