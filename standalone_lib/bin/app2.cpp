@@ -10,7 +10,7 @@
 
 using std::cin;
 using std::cout;
-using std::clog;
+using std::cerr;
 using std::endl;
 
 liblabel::Polyline assemblePolyline(std::vector<double>& coords) {
@@ -61,31 +61,19 @@ Input interactiveInput() {
 
 int main(int argc, char** argv) {
     cout << std::setprecision(std::numeric_limits<double>::digits10 + 1);
-    clog << std::setprecision(std::numeric_limits<double>::digits10 + 1);
-    clog << "Get labeling parameters interactively!" << endl;
     Input input = interactiveInput();
 
-    clog << "Let's compute a curved area label!" << endl;
-    clog << "Aspect was " << input.aspect << endl;
-    clog << "Input poly outer poly has " << input.poly.outer.points.size() << " points"
-         << " and " << input.poly.holes.size() << " holes." << endl;
-
-    std::clog << "Starting labeling ..." << std::endl;
     auto labelOp = liblabel::computeLabel(input.aspect, input.poly);
 
     if(labelOp.has_value()) {
         auto label = labelOp.value();
-        clog << "Computed label was:\n"
-            << "Center\t" << "(" << label.center.x << ", " << label.center.y << ")\n"
-            << "Radii \t" << "low: " << label.rad_lower << " up: " << label.rad_upper << "\n"
-            << "Angles\t" << "from: " << label.from << " to: " << label.to << endl;
         cout << "AreaLabel: "
              << "(" << label.center.x << ", " << label.center.y
              << ", " << label.rad_lower << ", " << label.rad_upper
              << ", " << label.from << ", " << label.to << ")"
              << endl;
     } else {
-        clog << "Label for the given input could not be constructed!" << endl;
+        cerr << "Label for the given input could not be constructed!" << endl;
     }
     return 0;
 }
