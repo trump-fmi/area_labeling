@@ -24,6 +24,38 @@ struct Input {
     liblabel::Polygon poly;
 };
 
+Input streamInput() {
+    liblabel::Aspect aspect;
+
+    cin >> aspect;
+    std::cin.ignore();      // ignore the newline character after aspect input
+
+    std::vector<double> coords;
+    double tmp;
+    std::string szTmp;
+    std::getline(cin, szTmp);
+    std::istringstream szStream(szTmp);
+    std::copy(std::istream_iterator<double>(szStream),
+        std::istream_iterator<double>(),
+        std::back_inserter(coords));
+    liblabel::Polyline outer = assemblePolyline(coords);
+
+    std::vector<liblabel::Polyline> holes;
+    for(std::string tmp; std::getline(cin, tmp);) {
+        coords.clear();
+        szStream = std::istringstream(tmp);
+        std::copy(std::istream_iterator<double>(szStream),
+            std::istream_iterator<double>(),
+            std::back_inserter(coords));
+        if(holes.size() == 0) {
+            break;
+        }
+        holes.push_back(assemblePolyline(coords));
+    }
+
+    return {aspect, {outer, holes}};
+}
+
 Input interactiveInput() {
     liblabel::Aspect aspect;
 
@@ -63,30 +95,53 @@ Input interactiveInput() {
 }
 
 int main(int argc, char** argv) {
-    cout << "Get labeling parameters interactively!" << endl;
-    Input input = interactiveInput();
-
-    cout << "Let's compute a curved area label!" << endl;
-    cout << "Aspect was " << input.aspect << endl;
-    cout << "Input poly outer poly has " << input.poly.outer.points.size() << " points"
-         << " and " << input.poly.holes.size() << " holes." << endl;
-
-    std::cout << "Starting labeling ..." << std::endl;
-    auto labelOp = liblabel::computeLabel(input.aspect, input.poly);
-
-    if(labelOp.has_value()) {
-        auto label = labelOp.value();
-        cout << "Computed label was:\n"
-            << "Center\t" << "(" << label.center.x << ", " << label.center.y << ")\n"
-            << "Radii \t" << "low: " << label.rad_lower << " up: " << label.rad_upper << "\n"
-            << "Angles\t" << "from: " << label.from << " to: " << label.to << endl;
-        cout << "As tuple: " << endl;
-        cout << "(" << label.center.x << ", " << label.center.y
-             << ", " << label.rad_lower << ", " << label.rad_upper
-             << ", " << label.from << ", " << label.to << ")"
+    if(argc < 2) {
+        cout << "Please use -i for interactive or -s for streamed input."
              << endl;
-    } else {
-        cout << "Label for the given input could not be constructed!" << endl;
+    } else if (argv[1] == "-i") {
+        cout << "Get labeling parameters interactively!" << endl;
+        Input input = interactiveInput();
+
+        cout << "Let's compute a curved area label!" << endl;
+        cout << "Aspect was " << input.aspect << endl;
+        cout << "Input poly outer poly has " << input.poly.outer.points.size() << " points"
+            << " and " << input.poly.holes.size() << " holes." << endl;
+
+        std::cout << "Starting labeling ..." << std::endl;
+        auto labelOp = liblabel::computeLabel(input.aspect, input.poly, true);
+
+        cout << std::setprecision(std::numeric_limits<double>::digits10 + 1);
+        if(labelOp.has_value()) {
+            auto label = labelOp.value();
+            cout << "Computed label was:\n"
+                << "Center\t" << "(" << label.center.x << ", " << label.center.y << ")\n"
+                << "Radii \t" << "low: " << label.rad_lower << " up: " << label.rad_upper << "\n"
+                << "Angles\t" << "from: " << label.from << " to: " << label.to << endl;
+            cout << "As tuple: " << endl;
+            cout << "(" << label.center.x << ", " << label.center.y
+                << ", " << label.rad_lower << ", " << label.rad_upper
+                << ", " << label.from << ", " << label.to << ")"
+                << endl;
+        } else {
+            cerr << "Label for the given input could not be constructed!" << endl;
+        }
+    } else if (argv[1] == "-s") {
+        Input input = streamInput();
+        Input input = interactiveInput();
+
+        auto labelOp = liblabel::computeLabel(input.aspect, input.poly);
+
+        cout << std::setprecision(std::numeric_limits<double>::digits10 + 1);
+        if(labelOp.has_value()) {
+            auto label = labelOp.value();
+            cout << "AreaLabel: "
+                << "(" << label.center.x << ", " << label.center.y
+                << ", " << label.rad_lower << ", " << label.rad_upper
+                << ", " << label.from << ", " << label.to << ")"
+                << endl;
+        } else {
+            cerr << "Label for the given input could not be constructed!" << endl;
+        }
     }
     return 0;
 }

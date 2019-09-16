@@ -60,33 +60,34 @@ namespace {
 std::optional<liblabel::AreaLabel> liblabel::computeLabel(
         liblabel::Aspect aspect,
         Polygon& poly,
+        bool progress,
         liblabel::Config configuration
     ){
-    std::cout << "Constructing the polygon ..." << std::endl;
+    if(progress) std::cout << "Constructing the polygon ..." << std::endl;
     KPolyWithHoles ph = constructPolygon(poly);
-    std::cout << "... finished" << std::endl;
+    if(progress) std::cout << "... finished" << std::endl;
 
     // Construct the skeleton
-    std::cout << "Construncting the skeleton ..." << std:: endl;
+    if(progress) std::cout << "Construncting the skeleton ..." << std:: endl;
     auto skeletonOp = constructSkeleton(ph);
-    std::cout << "... finished" << std:: endl;
+    if(progress) std::cout << "... finished" << std:: endl;
     if(!skeletonOp.has_value()) {
         return {};
     }
-    std::cout << "The computed skeleton contains " << skeletonOp.value().size() << " many edges" << std::endl;
+    if(progress) std::cout << "The computed skeleton contains " << skeletonOp.value().size() << " many edges" << std::endl;
 
     // Find candidate paths
-    std::cout << "Searching for longest paths ..." << std::endl;
+    if(progress) std::cout << "Searching for longest paths ..." << std::endl;
     auto paths = computeLongestPaths(skeletonOp.value(), aspect, configuration);
-    std::cout << "... finished. Found " << paths.size() << " candidate paths" << std::endl;
+    if(progress) std::cout << "... finished. Found " << paths.size() << " candidate paths" << std::endl;
 
     // Evaluate paths
-    std::cout << "Evaluating paths ..." << std::endl;
+    if(progress) std::cout << "Evaluating paths ..." << std::endl;
     auto res = evaluatePaths(paths, aspect, ph);
     if(!res.has_value()) {
-        std::cout << "... finished without an result!" << std::endl;
+        if(progress) std::cout << "... finished without an result!" << std::endl;
     } else {
-        std::cout << "... finished" << std::endl;
+        if(progress) std::cout << "... finished" << std::endl;
     }
 
     return res;

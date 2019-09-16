@@ -59,6 +59,7 @@ namespace liblabel {
 
     std::optional<liblabel::AreaLabel> computeLabel( liblabel::Aspect,
                                                      liblabel::Polygon&,
+                                                     progress = false,
                                                      liblabel::Config = liblabel::Config() );
 }
 
