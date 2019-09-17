@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cassert>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <sstream>
@@ -8,6 +9,7 @@
 
 using std::cin;
 using std::cout;
+using std::cerr;
 using std::endl;
 
 liblabel::Polyline assemblePolyline(std::vector<double>& coords) {
@@ -72,6 +74,7 @@ Input interactiveInput() {
     std::copy(std::istream_iterator<double>(szStream),
         std::istream_iterator<double>(),
         std::back_inserter(coords));
+    cout << "Outer Polygon contained " << coords.size() << " many elements." << endl;
     liblabel::Polyline outer = assemblePolyline(coords);
 
     std::vector<liblabel::Polyline> holes;
@@ -98,7 +101,7 @@ int main(int argc, char** argv) {
     if(argc < 2) {
         cout << "Please use -i for interactive or -s for streamed input."
              << endl;
-    } else if (argv[1] == "-i") {
+    } else if ("-i" == std::string(argv[1])) {
         cout << "Get labeling parameters interactively!" << endl;
         Input input = interactiveInput();
 
@@ -125,9 +128,8 @@ int main(int argc, char** argv) {
         } else {
             cerr << "Label for the given input could not be constructed!" << endl;
         }
-    } else if (argv[1] == "-s") {
+    } else if ("-s" == std::string(argv[1])) {
         Input input = streamInput();
-        Input input = interactiveInput();
 
         auto labelOp = liblabel::computeLabel(input.aspect, input.poly);
 
@@ -142,6 +144,9 @@ int main(int argc, char** argv) {
         } else {
             cerr << "Label for the given input could not be constructed!" << endl;
         }
+    } else {
+        cout << "Please use -i for interactive or -s for streamed input."
+             << endl;
     }
     return 0;
 }

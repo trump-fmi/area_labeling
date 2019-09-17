@@ -13,6 +13,7 @@
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_with_holes_2.h>
 
+const size_t TARGET_POLY_SIZE = 100;
 
 namespace debug {
     using namespace std;
@@ -65,7 +66,8 @@ std::optional<liblabel::AreaLabel> liblabel::computeLabel(
     ){
     if(progress) std::cout << "Constructing the polygon ..." << std::endl;
     KPolyWithHoles ph = constructPolygon(poly);
-    if(progress) std::cout << "... finished" << std::endl;
+    if(progress) std::cout << "... finished.\nOuter polygon was supsampled to "
+                           << ph.outer_boundary().size() << " many points." << std::endl;
 
     // Construct the skeleton
     if(progress) std::cout << "Construncting the skeleton ..." << std:: endl;
@@ -95,6 +97,63 @@ std::optional<liblabel::AreaLabel> liblabel::computeLabel(
 
 
 namespace {
+    double segLength(const KSegment& seg) {
+        return sqrt(CGAL::squared_distance(seg.source(), seg.target()));
+    }
+
+    std::vector<KPoint> supsampleSegment(const KSegment& seg, double precision) {
+        auto s = seg.source();
+        auto t = seg.target();
+
+        double dist = segLength(seg);
+        size_t target = (size_t) ceil(dist / precision);
+
+        double stepX = (t.x() - s.x()) / (target - 1);
+        double stepY = (t.y() - s.y()) / (target - 1);
+
+        std::vector<KPoint> res;
+        for (size_t i = 0; i < target - 1; ++i) {
+            res.emplace_back(s.x() + i*stepX, s.y() + i*stepY);
+        }
+        res.emplace_back(t);
+
+        return res;
+    }
+
+    KPolygon supsampleSimplePolygon(const KPolygon& poly, double precision) {
+        
+        std::vector<KPoint> res;
+        for(auto eit = poly.edges_begin(), end = poly.edges_end(); eit != end; ++eit) {
+            auto sups = supsampleSegment(*eit, precision);
+            sups.pop_back();
+            res.insert(res.end(), sups.begin(), sups.end());
+        }
+
+        return KPolygon(res.begin(), res.end());
+    }
+
+    double polyLength(const KPolygon& poly) {
+        double dist = 0;
+
+        for(auto eit = poly.edges_begin(), end = poly.edges_end(); eit != end; ++eit) {
+            dist += segLength(*eit);
+        }
+
+        return dist;
+    }
+
+    KPolyWithHoles supsamplePolygon(const KPolyWithHoles& poly, size_t target_size) {
+        double precision = polyLength(poly.outer_boundary()) / target_size;
+
+        KPolygon supsOuter = supsampleSimplePolygon(poly.outer_boundary(), precision);
+        std::vector<KPolygon> supsHoles;
+        for(auto hit = poly.holes_begin(), end = poly.holes_end(); hit != end; ++hit) {
+            supsHoles.push_back(supsampleSimplePolygon(*hit, precision));
+        }
+
+        return KPolyWithHoles(supsOuter, supsHoles.begin(), supsHoles.end());
+    }
+
     KPolyWithHoles constructPolygon(const liblabel::Polygon& poly) {
         std::vector<KPoint> tempPts;
         std::transform(poly.outer.points.begin(), poly.outer.points.end(),
@@ -109,7 +168,11 @@ namespace {
                 [](liblabel::Point p) -> KPoint { return {p.x, p.y}; });
             holes.emplace_back(tempPts.begin(), tempPts.end());
         }
-        return KPolyWithHoles(outer, holes.begin(), holes.end());
+
+        return supsamplePolygon(
+            KPolyWithHoles(outer, holes.begin(), holes.end()),
+            TARGET_POLY_SIZE
+        );
     }
 
     std::optional<std::vector<AugmentedSkeletonEdge>> constructSkeleton(const KPolyWithHoles& ph) {
