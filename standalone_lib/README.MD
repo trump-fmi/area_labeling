@@ -45,7 +45,7 @@ Now you can use the command line interface to compute the labelling for a polygo
 The example below computes the area label given in the above example.
 
 ```
-> ./bin/labeling
+> ./bin/labeling -i
 Let's compute a curved area label!
 Give the label aspect ratio A = H/W: 0.2
 Give the sequence of coordinates defining the outer boundary: 
@@ -72,6 +72,15 @@ As tuple:
 (43.92956179079158, 39.01376572114957, 2.766894782127091, 4.514003882894896, 0.7907166909282513, 3.947882464005985)
 ```
 
+Alternatively you can use the switch "-s" to activate streaming input.
+Then perform as follows:
+```
+> echo "0.2
+49.789472 44.936342 46.827233 36.076090 45.769290 34.492104 44.532311 34.450607 44.450931 35.633369 45.142662 38.601517 44.703209 40.574052 43.873131 40.594818 43.327884 39.148235 43.775475 36.809409 42.310631 35.571113 40.707441 35.654121 39.096113 36.629532 37.566165 37.971806 39.039147 41.840916 42.660566 44.964048 46.802819 46.328686
+45 44 46 45 48 44 47 43" > input.txt
+> ./bin/liblabel -s < input.txt
+AreaLabel: (44.42722628408297, 40.89693716016586, 1.994159725368474, 3.804747574112862, 5.432701526503197, 3.689242465198507)
+```
 
 ## The Library
 
