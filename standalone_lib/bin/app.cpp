@@ -12,7 +12,17 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+bool inputIsClosed(std::vector<double>& coords) {
+    return coords[0] == coords[coords.size()-2] && coords[1] == coords[coords.size()-1];
+}
+
 liblabel::Polyline assemblePolyline(std::vector<double>& coords) {
+    if (inputIsClosed(coords)) {
+        // Remove the last point at the polyline otherwise will have a self loop
+        // when an edge is introduced between the first and last vertex
+        coords.pop_back();
+        coords.pop_back();
+    }
     assert(coords.size() % 2 == 0);
     std::vector<liblabel::Point> points;
     for(auto it = coords.begin(), end = coords.end(); it != end; ++it) {
