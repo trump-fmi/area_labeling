@@ -261,7 +261,6 @@ namespace {
         double angleRange = pos.y();
         double x = (aspect * angleRange);
         double h = x * baseRadius / (1 + x);
-        // double base_angle = normalizeAngle(base_angle);
         return {
             center, baseRadius - h, baseRadius + h,
             normalizeAngle(baseAngle - angleRange),
@@ -270,7 +269,8 @@ namespace {
     }
 
     double lblValue(liblabel::AreaLabel& l) {
-        return l.rad_lower * abs(l.to - l.from);
+        double height = l.rad_upper - l.rad_lower;
+        return height;
     }
 
     std::optional<liblabel::AreaLabel> evaluatePaths(const std::vector<Path>& paths, const liblabel::Aspect aspect, const KPolyWithHoles& ph) {
@@ -301,6 +301,8 @@ namespace {
         if(result.size() == 0) {
             return {};
         }
+
+        std::cerr << "Searching for best positions from " << result.size() << " many!" << std::endl;
 
         return *std::max_element(result.begin(), result.end(),
             [](auto l1, auto l2) { return lblValue(l1) < lblValue(l2); });
