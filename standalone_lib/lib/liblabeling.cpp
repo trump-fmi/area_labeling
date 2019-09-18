@@ -106,13 +106,14 @@ namespace {
         auto t = seg.target();
 
         double dist = segLength(seg);
-        size_t target = (size_t) ceil(dist / precision);
+        size_t target = (size_t) ceil(dist / precision) - 1; // nr of points to insert
 
-        double stepX = (t.x() - s.x()) / (target - 1);
-        double stepY = (t.y() - s.y()) / (target - 1);
+        double stepX = (t.x() - s.x()) / (target + 1);
+        double stepY = (t.y() - s.y()) / (target + 1);
 
         std::vector<KPoint> res;
-        for (size_t i = 0; i < target - 1; ++i) {
+        res.emplace_back(s);
+        for (size_t i = 1; i <= target; ++i) {
             res.emplace_back(s.x() + i*stepX, s.y() + i*stepY);
         }
         res.emplace_back(t);
@@ -121,7 +122,6 @@ namespace {
     }
 
     KPolygon supsampleSimplePolygon(const KPolygon& poly, double precision) {
-        
         std::vector<KPoint> res;
         for(auto eit = poly.edges_begin(), end = poly.edges_end(); eit != end; ++eit) {
             auto sups = supsampleSegment(*eit, precision);
@@ -217,14 +217,14 @@ namespace {
             [&graph](auto path) -> Path {
                 Path res;
                 std::transform(path.begin(), path.end(),
-                std::back_inserter(res),
-                [&graph](auto p) -> liblabel::Point {return {graph[p].x, graph[p].y};});
+                    std::back_inserter(res),
+                    [&graph](auto p) -> liblabel::Point {return {graph[p].x, graph[p].y};});
                 return res;
             });
         return res;
     }
 
-    std::optional<KPoint> computeAreaLabel(const circle_apx_nsp::Circle& c, const liblabel::Aspect aspect, std::vector<K::Segment_2>& segments, const KPolyWithHoles& ph) {
+    std::optional<KPoint> computeOptPlacement(const circle_apx_nsp::Circle& c, const liblabel::Aspect aspect, std::vector<K::Segment_2>& segments, const KPolyWithHoles& ph) {
         K::Circle_2 circle = {{c.x, c.y}, c.r*c.r};
         auto cups = compute_all_cups(segments, circle, aspect);
 
@@ -253,12 +253,12 @@ namespace {
         return angle;
     }
 
-    liblabel::AreaLabel constructLabel(const std::pair<circle_apx_nsp::Circle, KPoint> value, const liblabel::Aspect aspect) {
-        liblabel::Point center{value.first.x, value.first.y};
-        double baseRadius = value.first.r;
+    liblabel::AreaLabel constructLabel(const circle_apx_nsp::Circle circle, KPoint pos, const liblabel::Aspect aspect) {
+        liblabel::Point center{circle.x, circle.y};
+        double baseRadius = circle.r;
 
-        double baseAngle = value.second.x();
-        double angleRange = value.second.y();
+        double baseAngle = pos.x();
+        double angleRange = pos.y();
         double x = (aspect * angleRange);
         double h = x * baseRadius / (1 + x);
         // double base_angle = normalizeAngle(base_angle);
@@ -267,6 +267,10 @@ namespace {
             normalizeAngle(baseAngle - angleRange),
             normalizeAngle(baseAngle + angleRange) 
         };
+    }
+
+    double lblValue(liblabel::AreaLabel& l) {
+        return l.rad_lower * abs(l.to - l.from);
     }
 
     std::optional<liblabel::AreaLabel> evaluatePaths(const std::vector<Path>& paths, const liblabel::Aspect aspect, const KPolyWithHoles& ph) {
@@ -279,7 +283,7 @@ namespace {
                 std::back_inserter(cgal_segs));
         }
 
-        std::vector<std::pair<circle_apx_nsp::Circle, KPoint>> result;
+        std::vector<liblabel::AreaLabel> result;
         for(auto path : paths) {
             std::vector<circle_apx_nsp::Point> points;
             std::transform(path.begin(), path.end(),
@@ -288,9 +292,9 @@ namespace {
 
             auto circle = apx_circle(points);
 
-            auto label = computeAreaLabel(circle, aspect, cgal_segs, ph);
-            if(label.has_value()) {
-                result.emplace_back(circle, label.value());
+            auto placement = computeOptPlacement(circle, aspect, cgal_segs, ph);
+            if(placement.has_value()) {
+                result.emplace_back(constructLabel(circle, placement.value(), aspect));
             }
         }
 
@@ -298,9 +302,7 @@ namespace {
             return {};
         }
 
-        auto max = std::max_element(result.begin(), result.end(),
-            [](auto p, auto q) { return p.second.y() < q.second.y();} );
-
-        return {constructLabel(*max, aspect)};
+        return *std::max_element(result.begin(), result.end(),
+            [](auto l1, auto l2) { return lblValue(l1) < lblValue(l2); });
     }
 }
