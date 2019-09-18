@@ -44,7 +44,7 @@ namespace liblabel {
         double stepSize = 2.;
 
         // Number of alternative longest paths to consider
-        size_t numberOfPaths = 10;
+        size_t numberOfPaths = 20;
     };
 
     struct AreaLabel {
