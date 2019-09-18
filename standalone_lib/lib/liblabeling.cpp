@@ -302,8 +302,6 @@ namespace {
             return {};
         }
 
-        std::cerr << "Searching for best positions from " << result.size() << " many!" << std::endl;
-
         return *std::max_element(result.begin(), result.end(),
             [](auto l1, auto l2) { return lblValue(l1) < lblValue(l2); });
     }
