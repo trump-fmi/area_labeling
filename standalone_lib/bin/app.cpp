@@ -146,11 +146,9 @@ int main(int argc, char** argv) {
         cout << std::setprecision(std::numeric_limits<double>::digits10 + 1);
         if(labelOp.has_value()) {
             auto label = labelOp.value();
-            cout << "AreaLabel: "
-                << "(" << label.center.x << ", " << label.center.y
-                << ", " << label.rad_lower << ", " << label.rad_upper
-                << ", " << label.from << ", " << label.to << ")"
-                << endl;
+            cout << label.center.x << " " << label.center.y
+                << " " << label.rad_lower << " " << label.rad_upper
+                << " " << label.from << " " << label.to << endl;
         } else {
             cerr << "Label for the given input could not be constructed!" << endl;
         }
