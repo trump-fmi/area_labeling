@@ -1,0 +1,19 @@
+---
+language: cpp
+dist: bionic
+env:
+  CGAL_VERSION: 4.13.1
+
+addons:
+  apt:
+    packages:
+      - libcgal-dev
+      - libboost-dev
+      - libboost-system-dev
+      - libboost-thread-dev
+
+script:
+  - mkdir standalone_lib/build
+  - cd standalone_lib/build
+  - cmake ..
+  - make
