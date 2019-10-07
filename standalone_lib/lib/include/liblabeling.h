@@ -1,6 +1,7 @@
 #ifndef LIBLABELING_H
 #define LIBLABELING_H
 
+#include <math.h>
 #include <optional>
 #include <vector>
 
@@ -41,10 +42,13 @@ namespace liblabel {
 
     struct Config {
         // Step size during the longest path search
-        double stepSize = 2.;
+        double stepSize = 2.5;
 
         // Number of alternative longest paths to consider
-        size_t numberOfPaths = 20;
+        size_t numberOfPaths = 30;
+
+        // The maximum angle a label might span (in radians)
+        double maxAngle = M_PI / 2;
     };
 
     struct AreaLabel {
@@ -52,9 +56,9 @@ namespace liblabel {
         Point center;
         // upper and lower radius of the label position
         double rad_lower, rad_upper;
-        // label starts at angle <from> and goes to <to>
-        // both angles are in degrees where 0 is the direction of the x axis
-        double from, to;
+        // the label is centered at angle normal and has the given extend
+        // The normal angle is relative to the positive x-direction
+        double normal, extend;
     };
 
     std::optional<liblabel::AreaLabel> computeLabel( liblabel::Aspect,
