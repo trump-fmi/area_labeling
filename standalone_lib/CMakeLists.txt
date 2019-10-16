@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.13)
 project(lib_area_labeling VERSION 1.0)
 
 # add_subdirectory(../lib/c_circle_apx)
