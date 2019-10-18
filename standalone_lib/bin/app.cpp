@@ -59,7 +59,7 @@ Input streamInput() {
         std::copy(std::istream_iterator<double>(szStream),
             std::istream_iterator<double>(),
             std::back_inserter(coords));
-        if(holes.size() == 0) {
+        if(coords.size() == 0) {
             break;
         }
         holes.push_back(assemblePolyline(coords));
