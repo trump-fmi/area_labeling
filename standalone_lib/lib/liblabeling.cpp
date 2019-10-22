@@ -55,7 +55,7 @@ namespace {
 
     std::vector<Path> computeLongestPaths(const std::vector<AugmentedSkeletonEdge>&, const liblabel::Aspect, const liblabel::Config&);
 
-    std::optional<liblabel::AreaLabel> evaluatePaths(const std::vector<Path>&, const liblabel::Aspect, const KPolyWithHoles&);
+    std::optional<liblabel::AreaLabel> evaluatePaths(const std::vector<Path>&, const liblabel::Aspect, const KPolyWithHoles&, const liblabel::Config&);
 }
 
 std::optional<liblabel::AreaLabel> liblabel::computeLabel(
@@ -85,7 +85,7 @@ std::optional<liblabel::AreaLabel> liblabel::computeLabel(
 
     // Evaluate paths
     if(progress) std::cout << "Evaluating paths ..." << std::endl;
-    auto res = evaluatePaths(paths, aspect, ph);
+    auto res = evaluatePaths(paths, aspect, ph, configuration);
     if(!res.has_value()) {
         if(progress) std::cout << "... finished without an result!" << std::endl;
     } else {
@@ -263,8 +263,8 @@ namespace {
         double h = x * baseRadius / (1 + x);
         return {
             center, baseRadius - h, baseRadius + h,
-            normalizeAngle(baseAngle - angleRange),
-            normalizeAngle(baseAngle + angleRange) 
+            normalizeAngle(baseAngle),
+            normalizeAngle(angleRange) 
         };
     }
 
@@ -273,7 +273,11 @@ namespace {
         return height;
     }
 
-    std::optional<liblabel::AreaLabel> evaluatePaths(const std::vector<Path>& paths, const liblabel::Aspect aspect, const KPolyWithHoles& ph) {
+    std::optional<liblabel::AreaLabel> evaluatePaths(
+            const std::vector<Path>& paths,
+            const liblabel::Aspect aspect,
+            const KPolyWithHoles& ph,
+            const liblabel::Config& config) {
         std::vector<K::Segment_2> cgal_segs;
         std::copy(ph.outer_boundary().edges_begin(),
             ph.outer_boundary().edges_end(),
@@ -294,6 +298,11 @@ namespace {
 
             auto placement = computeOptPlacement(circle, aspect, cgal_segs, ph);
             if(placement.has_value()) {
+                auto placement_val = placement.value();
+                if(placement_val.y() > config.maxAngle ) {
+                    // if the placement > 90°, return none
+                    continue;
+                }
                 result.emplace_back(constructLabel(circle, placement.value(), aspect));
             }
         }

@@ -129,11 +129,11 @@ int main(int argc, char** argv) {
             cout << "Computed label was:\n"
                 << "Center\t" << "(" << label.center.x << ", " << label.center.y << ")\n"
                 << "Radii \t" << "low: " << label.rad_lower << " up: " << label.rad_upper << "\n"
-                << "Angles\t" << "from: " << label.from << " to: " << label.to << endl;
+                << "Angles\t" << "normal: " << label.normal << " extend: " << label.extend << endl;
             cout << "As tuple: " << endl;
             cout << "(" << label.center.x << ", " << label.center.y
                 << ", " << label.rad_lower << ", " << label.rad_upper
-                << ", " << label.from << ", " << label.to << ")"
+                << ", " << label.normal << ", " << label.extend << ")"
                 << endl;
         } else {
             cerr << "Label for the given input could not be constructed!" << endl;
@@ -146,9 +146,11 @@ int main(int argc, char** argv) {
         cout << std::setprecision(std::numeric_limits<double>::digits10 + 1);
         if(labelOp.has_value()) {
             auto label = labelOp.value();
-            cout << label.center.x << " " << label.center.y
-                << " " << label.rad_lower << " " << label.rad_upper
-                << " " << label.from << " " << label.to << endl;
+            cout << "AreaLabel: "
+                << "(" << label.center.x << ", " << label.center.y
+                << ", " << label.rad_lower << ", " << label.rad_upper
+                << ", " << label.normal << ", " << label.extend << ")"
+                << endl;
         } else {
             cerr << "Label for the given input could not be constructed!" << endl;
         }
