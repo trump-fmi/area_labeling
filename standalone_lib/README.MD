@@ -1,4 +1,4 @@
-# Area Labeling
+# Area Labeling [![Build Status](https://travis-ci.org/trump-fmi/area_labeling.svg?branch=master)](https://travis-ci.org/trump-fmi/area_labeling)
 
 ![Example of a curved area label](pics/polyWithLabel.png)
 
