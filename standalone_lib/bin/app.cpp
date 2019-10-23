@@ -148,7 +148,7 @@ int main(int argc, char** argv) {
             auto label = labelOp.value();
             cout << label.center.x << " " << label.center.y
                 << " " << label.rad_lower << " " << label.rad_upper
-                << " " << label.from << " " << label.to << endl;
+                << " " << label.normal << " " << label.extend << endl;
         } else {
             cerr << "Label for the given input could not be constructed!" << endl;
         }
